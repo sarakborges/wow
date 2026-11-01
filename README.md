@@ -10,7 +10,7 @@ This is a standalone, local game runtime—not a private-server fork. It does no
 
 ## Current status
 
-**Bootstrap prototype committed.** The Godot .NET project opens a generated test scene with a placeholder third-person character, a flat test floor, camera, lighting and WASD movement. It does not yet load WoW maps, models, animations, spells or talents.
+**Bootstrap prototype committed.** The Godot .NET project contains a generated test scene with a placeholder third-person character, flat test floor, camera, lighting and WASD movement. It does not yet load WoW maps, models, animations, spells or talents.
 
 The first content milestone is a vertical slice that loads one Classic terrain area and one Midnight character model into the same runtime, renders and animates the character, and supports local movement. This must validate the cross-version asset pipeline before gameplay implementation expands.
 
@@ -31,7 +31,9 @@ The first content milestone is a vertical slice that loads one Classic terrain a
 - C# / .NET 8 for the initial engine-independent core library.
 - Source adapters and offline import tools for each WoW data generation.
 
-The Godot SDK version is pinned in `src/Wow.Client/Wow.Client.csproj`.
+## Build and run
+
+See [client setup instructions](src/Wow.Client/README.md). Open `src/Wow.Client/project.godot` with Godot 4.7.2 .NET (not the standard editor), then build the C# project before running.
 
 ## Development principles
 
