@@ -53,6 +53,22 @@ The JSON catalog contains:
 - File-extension and archive summary counts.
 - Broad archive categories: global base, locale base, global patch, locale patch, or other.
 
+## Duplicate audit
+
+A second binary reads an existing schema-v2 catalog and produces a detailed duplicate report. It resolves provider indices back to archive paths, summarizes duplicate counts by extension, counts shared paths for each archive pair, and includes examples of duplicated M2 character models.
+
+Run it from the repository root:
+
+```powershell
+cargo run --release --manifest-path tools/Wow.MpqInspector/Cargo.toml --bin catalog-audit -- --catalog "C:\wow-manifests\wotlk-hd-catalog-v2.json" --json "C:\wow-manifests\wotlk-hd-duplicate-audit.json" --csv "C:\wow-manifests\wotlk-hd-duplicate-providers.csv"
+```
+
+The JSON report contains every duplicate path and its providers. The optional CSV is normalized to one row per provider, making it easier to filter by extension, archive, size, or flags in a spreadsheet.
+
+The audit deliberately leaves `winner` null and `resolutionStatus` as `unresolved`. The catalog's archive indices follow the inspector's deterministic path enumeration; they are not the client's load order. Archive categories are descriptive, not a precedence ranking. The audit does not infer an effective loading order or modify the source catalog.
+
+Both report files should remain outside the repository because the source catalog and reports can reveal local installation paths and client inventory details.
+
 ## Important interpretation limits
 
 - A filename is only discoverable when it is present in the archive's internal `(listfile)`. Archives without a usable listfile can still be counted, but their filenames cannot be reconstructed by this pass.
