@@ -10,6 +10,9 @@
 *.csproj.user
 *.sln.docstates
 
+# Rust build output
+**/target/
+
 # Local source installations and imported game content
 /assets/local/
 /assets/imported/
@@ -27,6 +30,7 @@
 *.anim
 *.skel
 *.casc
+*.catalog.json
 
 # Generated build/export output
 /export.cfg
