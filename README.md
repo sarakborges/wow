@@ -10,7 +10,7 @@ This is a standalone, local game runtime—not a private-server fork. It does no
 
 ## Current status
 
-The Godot .NET client contains a generated third-person smoke-test scene with placeholder geometry. A separate read-only source inspector can inventory local installation markers and write JSON manifests. No WoW map, character, animation, spell or talent data is imported yet.
+The Godot .NET client contains a generated third-person smoke-test scene with placeholder geometry. The read-only source inspector can inventory local installation markers, and the MPQ inspector can catalog filenames and duplicate paths exposed by MPQ internal listfiles. No WoW map, character, animation, spell or talent data is imported yet.
 
 ## Repository layout
 
@@ -20,25 +20,38 @@ The Godot .NET client contains a generated third-person smoke-test scene with pl
 - `src/Wow.Client/` — Godot client and prototype scene.
 - `src/Wow.Core/` — engine-independent C# domain, source inventory and import contracts.
 - `tools/Wow.SourceInspector/` — local installation inventory CLI.
-- `tools/` — planned asset inspection, conversion and validation utilities.
-- `tests/` — planned parser, adapter and runtime-contract tests.
+- `tools/Wow.MpqInspector/` — Rust-based read-only MPQ catalog CLI.
+- `tools/` — asset inspection, conversion and validation utilities.
+- `tests/` — parser, adapter and runtime-contract tests.
 - `assets/` — project-authored assets and local import outputs; proprietary source data is excluded.
 
 ## Technology
 
 - Godot **4.7.2 .NET** for the client.
-- C# / .NET 8 for the engine-independent core and inspection tools.
+- C# / .NET 8 for the client, core and source inspector.
+- Rust 1.92+ for the standalone MPQ catalog tool.
 - Source adapters and offline import tools for each WoW data generation.
 
 ## Build
+
+Build the Godot client and C# core:
 
 ```sh
 dotnet build src/Wow.Client/Wow.Client.sln --configuration Release
 ```
 
+Build and test the MPQ inspector:
+
+```sh
+cargo test --manifest-path tools/Wow.MpqInspector/Cargo.toml
+cargo build --release --manifest-path tools/Wow.MpqInspector/Cargo.toml
+```
+
 ## Inspect local source installations
 
 See [Source Inspector usage](tools/Wow.SourceInspector/README.md) and [source inventory design](docs/architecture/source-inventory.md).
+
+For MPQ installations, see [MPQ Inspector usage](tools/Wow.MpqInspector/README.md). It inventories the paths exposed by archive listfiles and reports duplicates without extracting source assets or deciding an unverified patch winner.
 
 ## Development principles
 
