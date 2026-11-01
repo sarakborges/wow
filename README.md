@@ -10,9 +10,7 @@ This is a standalone, local game runtime—not a private-server fork. It does no
 
 ## Current status
 
-**Bootstrap prototype committed.** The Godot .NET project contains a generated test scene with a placeholder third-person character, flat test floor, camera, lighting and WASD movement. It does not yet load WoW maps, models, animations, spells or talents.
-
-The first content milestone is a vertical slice that loads one Classic terrain area and one Midnight character model into the same runtime, renders and animates the character, and supports local movement. This must validate the cross-version asset pipeline before gameplay implementation expands.
+The Godot .NET client contains a generated third-person smoke-test scene with placeholder geometry. A separate read-only source inspector can inventory local installation markers and write JSON manifests. No WoW map, character, animation, spell or talent data is imported yet.
 
 ## Repository layout
 
@@ -20,7 +18,8 @@ The first content milestone is a vertical slice that loads one Classic terrain a
 - `docs/research/` — source-version and format-support investigation.
 - `docs/roadmap/` — milestones and acceptance criteria.
 - `src/Wow.Client/` — Godot client and prototype scene.
-- `src/Wow.Core/` — engine-independent C# domain and import contracts.
+- `src/Wow.Core/` — engine-independent C# domain, source inventory and import contracts.
+- `tools/Wow.SourceInspector/` — local installation inventory CLI.
 - `tools/` — planned asset inspection, conversion and validation utilities.
 - `tests/` — planned parser, adapter and runtime-contract tests.
 - `assets/` — project-authored assets and local import outputs; proprietary source data is excluded.
@@ -28,12 +27,18 @@ The first content milestone is a vertical slice that loads one Classic terrain a
 ## Technology
 
 - Godot **4.7.2 .NET** for the client.
-- C# / .NET 8 for the initial engine-independent core library.
+- C# / .NET 8 for the engine-independent core and inspection tools.
 - Source adapters and offline import tools for each WoW data generation.
 
-## Build and run
+## Build
 
-See [client setup instructions](src/Wow.Client/README.md). Open `src/Wow.Client/project.godot` with Godot 4.7.2 .NET (not the standard editor), then build the C# project before running.
+```sh
+dotnet build src/Wow.Client/Wow.Client.sln --configuration Release
+```
+
+## Inspect local source installations
+
+See [Source Inspector usage](tools/Wow.SourceInspector/README.md) and [source inventory design](docs/architecture/source-inventory.md).
 
 ## Development principles
 

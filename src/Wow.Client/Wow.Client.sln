@@ -6,6 +6,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wow.Client", "Wow.Client.cs
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wow.Core", "..\Wow.Core\Wow.Core.csproj", "{A4B489F2-A1D5-4FA5-9D1E-B982D80DAF02}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wow.SourceInspector", "..\..\tools\Wow.SourceInspector\Wow.SourceInspector.csproj", "{B7B5D107-0A21-4F0A-92A4-E2B4CF89C003}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

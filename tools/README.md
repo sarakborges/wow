@@ -1,8 +1,12 @@
 # Import and inspection tools
 
-Planned command-line tools:
+## Available
 
-- source inventory and build detection;
+- **Wow.SourceInspector** — read-only CLI that inventories local installation markers, MPQ archive metadata, CASC directory structure and root executable version metadata. See [tool usage](Wow.SourceInspector/README.md).
+
+## Planned
+
+- source inventory and build verification;
 - archive/container and index inspection;
 - Classic world tile inspection;
 - Midnight character bundle inspection;

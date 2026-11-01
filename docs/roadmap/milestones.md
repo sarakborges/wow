@@ -2,22 +2,25 @@
 
 ## M0 — Repository and runtime bootstrap
 
-**Status: initial bootstrap committed; local build/run still needs verification.**
+**Status: build verified in GitHub Actions; editor runtime verification pending.**
 
 - [x] Establish project boundaries and source-of-truth versions.
 - [x] Create Godot .NET client project and engine-independent core library.
 - [x] Add generated placeholder floor, capsule character, camera, lighting and keyboard movement.
-- [ ] Open with Godot 4.7.2 .NET and verify import/build/run on the development machine.
-- [ ] Add CI or a documented local verification script once the target environment is known.
+- [x] Add C# solution and CI build for client and core.
+- [ ] Open with Godot 4.7.2 .NET and verify scene instantiation/run on the development machine.
 
 Acceptance: the placeholder scene runs without any installed WoW client or imported game assets.
 
 ## M1 — Source inventory and import spike
 
-- [ ] Record the exact Classic and Midnight source builds.
-- [ ] Verify local source paths and read-only access.
-- [ ] Create a CLI that lists files/records and reports source IDs and versions.
-- [ ] Validate one export path for Classic terrain and one for a Midnight character.
+**Status: metadata-only source inspector implemented; local inventories and format spike pending.**
+
+- [x] Implement a read-only CLI for CASC/MPQ layout discovery.
+- [x] Emit a versioned JSON inventory manifest.
+- [ ] Run the inspector against the selected Classic, WotLK and Midnight source installations.
+- [ ] Verify exact source client/data builds and record them in the source matrix.
+- [ ] Validate an export path for Classic terrain and one for a Midnight character.
 - [ ] Capture provenance manifests and fail on incomplete/mismatched bundles.
 
 Acceptance: one terrain tile and one animated character can be imported reproducibly, with source provenance and no modifications to the source installation.
