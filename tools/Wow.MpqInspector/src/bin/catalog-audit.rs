@@ -284,7 +284,10 @@ fn build_report(catalog: &InputCatalog) -> Result<AuditReport, Box<dyn std::erro
 }
 
 fn file_extension(path: &str) -> String {
-    let file_name = path.rsplit(['/', '\\']).next().unwrap_or(path);
+    let file_name = path
+        .rsplit(|character| character == '/' || character == '\\')
+        .next()
+        .unwrap_or(path);
     match file_name.rsplit_once('.') {
         Some((stem, extension)) if !stem.is_empty() && !extension.is_empty() => {
             extension.to_ascii_lowercase()
@@ -345,7 +348,10 @@ fn write_csv(
 }
 
 fn csv_escape(value: &str) -> String {
-    if value.contains([',', '"', '\n', '\r']) {
+    if value
+        .chars()
+        .any(|character| matches!(character, ',' | '"' | '\n' | '\r'))
+    {
         format!("\"{}\"", value.replace('"', "\"\""))
     } else {
         value.to_owned()
