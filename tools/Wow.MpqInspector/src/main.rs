@@ -314,7 +314,7 @@ fn inspect(
 
     let files = file_groups
         .into_iter()
-        .map(|(normalized_path, group)| FileRecord {
+        .map(|(_, group)| FileRecord {
             path: group.path,
             providers: group.providers,
         })
