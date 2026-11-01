@@ -494,8 +494,8 @@ fn path_components(path: &Path) -> Vec<String> {
 
 fn looks_like_locale(value: &str) -> bool {
     const LOCALE_CODES: &[&str] = &[
-        "enus", "engb", "dede", "eses", "esmx", "frfr", "itit", "kokr", "ptbr", "ruru",
-        "zhcn", "zhtw",
+        "enus", "engb", "dede", "eses", "esmx", "frfr", "itit", "kokr", "ptbr", "ruru", "zhcn",
+        "zhtw",
     ];
     LOCALE_CODES
         .iter()
