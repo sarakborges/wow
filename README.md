@@ -2,29 +2,36 @@
 
 A custom single-player game runtime combining:
 
-- **WotLK 3.3.5a** as the gameplay ruleset (classes, spells, talents, combat and progression).
-- **Midnight** as a visual-content reference (character models, customization, skeletons and animations).
-- **Classic** as the initial world-content reference (maps, terrain, towns and dungeons).
+- **WotLK 3.3.5a (build 12340)** as the gameplay ruleset: classes, spells, talents, glyphs, combat and progression.
+- **Midnight (12.x)** as a visual-content source: character models, customization, skeletons and animations. The exact source build will be pinned after an asset audit.
+- **Classic-era data** as the initial world-content source: maps, terrain, towns and dungeons. The exact client/data build will be pinned after an asset audit.
 
-The project is not a private-server fork and does not aim to implement the original WoW network protocol. Gameplay simulation runs locally; presentation and simulation remain separate.
+This is a standalone, local game runtime—not a private-server fork. It does not implement the original WoW network protocol. Gameplay simulation is local, and simulation data is kept separate from presentation and source-file formats.
 
-## Project status
+## Current status
 
-**Stage: architecture and asset-pipeline investigation.** No playable client or imported game assets exist yet.
+**Bootstrap prototype committed.** The Godot .NET project opens a generated test scene with a placeholder third-person character, a flat test floor, camera, lighting and WASD movement. It does not yet load WoW maps, models, animations, spells or talents.
 
-The first technical milestone is a small vertical slice that can load one Classic terrain area and one independently sourced character model into the same runtime, render and animate the character, and support basic local movement. This milestone must validate the data pipeline before gameplay implementation expands.
+The first content milestone is a vertical slice that loads one Classic terrain area and one Midnight character model into the same runtime, renders and animates the character, and supports local movement. This must validate the cross-version asset pipeline before gameplay implementation expands.
 
 ## Repository layout
 
-- `docs/architecture/` — runtime boundaries, data model and technical decisions.
-- `docs/research/` — format support, source evaluation and compatibility notes.
+- `docs/architecture/` — runtime boundaries, asset pipeline and technical decisions.
+- `docs/research/` — source-version and format-support investigation.
 - `docs/roadmap/` — milestones and acceptance criteria.
-- `src/` — game runtime and reusable libraries.
-- `tools/` — asset inspection, conversion and validation utilities.
-- `tests/` — automated tests for parsers, adapters and runtime contracts.
-- `assets/` — project-authored assets and local import outputs; original game data is not committed.
+- `src/Wow.Client/` — Godot client and prototype scene.
+- `src/Wow.Core/` — engine-independent C# domain and import contracts.
+- `tools/` — planned asset inspection, conversion and validation utilities.
+- `tests/` — planned parser, adapter and runtime-contract tests.
+- `assets/` — project-authored assets and local import outputs; proprietary source data is excluded.
 
-See [Architecture](docs/architecture/overview.md) and [Roadmap](docs/roadmap/milestones.md).
+## Technology
+
+- Godot **4.7.2 .NET** for the client.
+- C# / .NET 8 for the initial engine-independent core library.
+- Source adapters and offline import tools for each WoW data generation.
+
+The Godot SDK version is pinned in `src/Wow.Client/Wow.Client.csproj`.
 
 ## Development principles
 
@@ -36,10 +43,6 @@ See [Architecture](docs/architecture/overview.md) and [Roadmap](docs/roadmap/mil
 6. Preserve source attribution and license notices for all third-party code and tools.
 7. Do not copy code from repositories without a compatible license.
 
-## Planned technology
-
-The initial implementation is planned in **Godot .NET / C#**, subject to the renderer and asset-pipeline spike. The engine version will be pinned when the prototype project is created, after testing the required import and rendering capabilities.
-
 ## Legal and asset boundary
 
-This repository contains original code, documentation, schemas and project-authored content only. Users must provide and lawfully possess any local game data they inspect. The project does not distribute Blizzard game files, extracted assets, or a client executable. Asset extraction and use must comply with applicable terms and law.
+This repository contains original code, documentation, schemas and project-authored content only. Local game data is not included. Any inspection, extraction, conversion or use of game data must be independently reviewed for compliance with the relevant terms and applicable law. The project does not distribute Blizzard game files, extracted assets, or a client executable.

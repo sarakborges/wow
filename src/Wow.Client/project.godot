@@ -1,0 +1,21 @@
+; Engine configuration file.
+; Godot 4.7.2 .NET — open this directory as the project root.
+
+config_version=5
+
+[application]
+
+config/name="WoW Single-player Runtime"
+run/main_scene="res://scenes/main.tscn"
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/stretch/mode="canvas_items"
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+textures/default_filters/use_nearest_mipmap_filter=false
