@@ -385,7 +385,10 @@ fn inspect(
     println!("WoW MPQ Inspector");
     println!("=================");
     println!("Root:              {}", source_root.display());
-    println!("Locale filter:     {}", locale_filter.unwrap_or("all locales"));
+    println!(
+        "Locale filter:     {}",
+        locale_filter.unwrap_or("all locales")
+    );
     println!("Archives:          {}", catalog.summary.total_archives);
     println!("Opened:            {}", catalog.summary.archives_opened);
     println!("Failed:            {}", catalog.summary.archives_failed);
