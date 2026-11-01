@@ -119,7 +119,6 @@ struct CatalogSummary {
 #[derive(Debug, Default)]
 struct FileRecordBuilder {
     path: String,
-    extension: Option<String>,
     providers: Vec<FileProvider>,
 }
 
@@ -140,6 +139,7 @@ fn run() -> anyhow_result::Result<()> {
             all_locales,
             include_anonymous,
             max_depth,
+            pretty,
             json,
         } => inspect(
             &path,
