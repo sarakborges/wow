@@ -493,7 +493,13 @@ fn path_components(path: &Path) -> Vec<String> {
 }
 
 fn looks_like_locale(value: &str) -> bool {
-    value.len() == 4 && value.bytes().all(|byte| byte.is_ascii_alphabetic())
+    const LOCALE_CODES: &[&str] = &[
+        "enus", "engb", "dede", "eses", "esmx", "frfr", "itit", "kokr", "ptbr", "ruru",
+        "zhcn", "zhtw",
+    ];
+    LOCALE_CODES
+        .iter()
+        .any(|locale| value.eq_ignore_ascii_case(locale))
 }
 
 fn classify_layer(relative_path: &Path) -> &'static str {
