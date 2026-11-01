@@ -26,3 +26,28 @@ jobs:
 
       - name: Build source inspector
         run: dotnet build tools/Wow.SourceInspector/Wow.SourceInspector.csproj --configuration Release
+
+  build-mpq-inspector:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Check formatting
+        run: cargo fmt --manifest-path tools/Wow.MpqInspector/Cargo.toml -- --check
+
+      - name: Test MPQ inspector
+        run: cargo test --manifest-path tools/Wow.MpqInspector/Cargo.toml
+
+      - name: Build MPQ inspector
+        run: cargo build --release --manifest-path tools/Wow.MpqInspector/Cargo.toml
+
+      - name: Upload Windows executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: wow-mpq-inspector-windows-x64
+          path: tools/Wow.MpqInspector/target/release/wow-mpq-inspector.exe
+          if-no-files-found: error
