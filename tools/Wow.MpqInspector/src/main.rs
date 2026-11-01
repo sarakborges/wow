@@ -214,7 +214,7 @@ fn inspect(
         let size_bytes = fs::metadata(&archive_path)
             .map(|metadata| metadata.len())
             .unwrap_or_default();
-        let layer_category = classify_layer(Path::new(&relative_path), locale_filter).to_owned();
+        let layer_category = classify_layer(Path::new(&relative_path)).to_owned();
 
         let mut record = ArchiveRecord {
             path: relative_path.clone(),
@@ -242,17 +242,21 @@ fn inspect(
             }
         };
 
-        let listfile_check = archive.find_file("(listfile)");
-        record.has_listfile = matches!(listfile_check, Ok(Some(_)));
+        let (has_listfile, listfile_check_error) = match archive.find_file("(listfile)") {
+            Ok(Some(_)) => (true, None),
+            Ok(None) => (false, None),
+            Err(error) => (
+                false,
+                Some(format!("Could not inspect internal (listfile): {error}")),
+            ),
+        };
+        record.has_listfile = has_listfile;
         if record.has_listfile {
             archives_with_listfile += 1;
         } else {
             archives_without_listfile += 1;
         }
-
-        if let Err(error) = listfile_check {
-            record.error = Some(format!("Could not inspect internal (listfile): {error}"));
-        }
+        record.error = listfile_check_error;
 
         let entries = match archive.list() {
             Ok(entries) => entries,
@@ -427,6 +431,7 @@ fn discover_archives(
             if file_type.is_file() {
                 if path
                     .extension()
+                    .and_then(|extension| extension.to_str())
                     .is_some_and(|extension| extension.eq_ignore_ascii_case("mpq"))
                 {
                     archives.push(path);
@@ -488,7 +493,7 @@ fn looks_like_locale(value: &str) -> bool {
     value.len() == 4 && value.bytes().all(|byte| byte.is_ascii_alphabetic())
 }
 
-fn classify_layer(relative_path: &Path, locale_filter: Option<&str>) -> &'static str {
+fn classify_layer(relative_path: &Path) -> &'static str {
     let components = path_components(relative_path);
     let Some(file_name) = components.last() else {
         return "other";
@@ -497,8 +502,7 @@ fn classify_layer(relative_path: &Path, locale_filter: Option<&str>) -> &'static
 
     let is_locale_archive = components.len() >= 3
         && components[0].eq_ignore_ascii_case("data")
-        && looks_like_locale(&components[1])
-        && locale_filter.is_none_or(|locale| components[1].eq_ignore_ascii_case(locale));
+        && looks_like_locale(&components[1]);
 
     if is_locale_archive {
         if file_name.starts_with("patch") {
@@ -609,11 +613,11 @@ mod tests {
     #[test]
     fn classifies_global_base_archives() {
         assert_eq!(
-            classify_layer(Path::new("Data/common-2.mpq"), Some("enus")),
+            classify_layer(Path::new("Data/common-2.mpq")),
             "global-base"
         );
         assert_eq!(
-            classify_layer(Path::new("Data/lichking.mpq"), Some("enus")),
+            classify_layer(Path::new("Data/lichking.mpq")),
             "global-base"
         );
     }
@@ -621,7 +625,7 @@ mod tests {
     #[test]
     fn classifies_global_patches() {
         assert_eq!(
-            classify_layer(Path::new("Data/patch-6.mpq"), Some("enus")),
+            classify_layer(Path::new("Data/patch-6.mpq")),
             "global-patch"
         );
     }
@@ -629,19 +633,16 @@ mod tests {
     #[test]
     fn classifies_selected_locale_patches() {
         assert_eq!(
-            classify_layer(
-                Path::new("Data/enUS/patch-enUS-Z.MPQ"),
-                Some("enus")
-            ),
+            classify_layer(Path::new("Data/enUS/patch-enUS-Z.MPQ")),
             "locale-patch"
         );
     }
 
     #[test]
-    fn ignores_unselected_locale_for_layer_classification() {
+    fn recognizes_patch_archives_inside_any_locale_folder() {
         assert_eq!(
-            classify_layer(Path::new("Data/dede/patch-dede.mpq"), Some("enus")),
-            "global-patch"
+            classify_layer(Path::new("Data/dede/patch-dede.mpq")),
+            "locale-patch"
         );
     }
 
