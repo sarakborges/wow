@@ -31,6 +31,7 @@
 *.skel
 *.casc
 *.catalog.json
+wotlk-hd-catalog*.json
 
 # Generated build/export output
 /export.cfg
