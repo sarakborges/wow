@@ -16,6 +16,8 @@ Open this directory as the Godot project root:
 
 Do not open the repository root. The `res://` paths are relative to this directory.
 
+The project declares its C# feature and assembly name in `project.godot`. Those settings must match the `Wow.Client` assembly produced by `Wow.Client.csproj`.
+
 ## Build
 
 In Godot, use the **Build** action in the editor toolbar before running the scene.
@@ -34,9 +36,9 @@ The message often means the C# assembly has not been built or loaded; it does no
 
 1. Confirm that the editor title/about dialog identifies the **.NET** build of Godot 4.7.2.
 2. Confirm that `dotnet --list-sdks` shows an installed 8.x SDK (or newer).
-3. Open this project directory and click **Build**.
-4. If the project was previously opened with a different Godot/.NET version, close Godot, remove the generated `.godot/mono/` directory, reopen the project with Godot 4.7.2 .NET, and build again.
-5. If the build fails, fix the first C# compiler or package-restore error shown in the editor or terminal before running the scene.
+3. Confirm that you opened `src/Wow.Client/project.godot`, not the repository root.
+4. Click **Build** in the Godot editor. Resolve the first C# compiler or NuGet restore error before running the scene.
+5. If the project was previously opened with a different Godot/.NET version, close Godot, remove the generated `.godot/mono/` directory, reopen the project with Godot 4.7.2 .NET, and build again.
 
 The project ignores `.godot/`, `bin/` and `obj/`; these are regenerated locally and should not be committed.
 
