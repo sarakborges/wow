@@ -34,13 +34,21 @@ cargo run --release --manifest-path tools/Wow.MpqInspector/Cargo.toml -- inspect
 
 Entries without usable filenames in an archive's internal `(listfile)` are counted as anonymous table entries and excluded from path comparisons by default. Use `--include-anonymous` to include them under archive-specific synthetic paths; these synthetic paths are not real game filenames.
 
+The default JSON output is compact (minified). Use `--pretty` only when you explicitly need a human-formatted JSON file; it can be substantially larger. The compact catalog uses schema version 2. Each file has a `path` and a `providers` array. Each provider is a four-number tuple:
+
+```json
+[archiveIndex, uncompressedSizeBytes, compressedSizeBytes, flags]
+```
+
+`archiveIndex` is a zero-based index into the top-level `archives` array. The raw MPQ `flags` replace the repeated compressed/encrypted/patch-file booleans; file extension is available from the path and remains counted in `summary.filesByExtension`. This preserves the information needed for archive comparisons while avoiding repeated property names and archive paths for every provider.
+
 ## Catalog contents
 
 The JSON catalog contains:
 
 - Archive paths, sizes, whether an internal `(listfile)` exists, and per-archive inspection errors.
 - Named files and every archive that provides each path.
-- Uncompressed/compressed sizes, MPQ flags, and compressed/encrypted/patch-file indicators.
+- Compact provider tuples containing archive index, uncompressed size, compressed size, and raw MPQ flags.
 - Duplicate paths, grouped case-insensitively with slash normalization.
 - File-extension and archive summary counts.
 - Broad archive categories: global base, locale base, global patch, locale patch, or other.
