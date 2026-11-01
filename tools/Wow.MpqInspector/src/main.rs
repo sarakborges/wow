@@ -45,6 +45,10 @@ enum Command {
         #[arg(long, default_value_t = 4)]
         max_depth: usize,
 
+        /// Pretty-print JSON (larger output); compact JSON is the default.
+        #[arg(long)]
+        pretty: bool,
+
         /// Destination JSON file. Keep this outside the source client directory.
         #[arg(long)]
         json: PathBuf,
@@ -85,23 +89,13 @@ struct ArchiveRecord {
 #[serde(rename_all = "camelCase")]
 struct FileRecord {
     path: String,
-    normalized_path: String,
-    extension: Option<String>,
     providers: Vec<FileProvider>,
 }
 
+/// Compact provider tuple: [archiveIndex, uncompressedSizeBytes, compressedSizeBytes, flags].
+/// archiveIndex points into Catalog.archives; flags retain the raw MPQ entry flags.
 #[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
-struct FileProvider {
-    archive_path: String,
-    uncompressed_size_bytes: u64,
-    compressed_size_bytes: u64,
-    flags: u32,
-    is_compressed: bool,
-    is_encrypted: bool,
-    is_mpq_patch_file: bool,
-    name_source: String,
-}
+struct FileProvider(u32, u64, u64, u32);
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -153,6 +147,7 @@ fn run() -> anyhow_result::Result<()> {
             all_locales,
             include_anonymous,
             max_depth,
+            pretty,
             &json,
         ),
     }
@@ -168,6 +163,7 @@ fn inspect(
     includes_all_locales: bool,
     include_anonymous: bool,
     max_depth: usize,
+    pretty: bool,
     output_path: &Path,
 ) -> anyhow_result::Result<()> {
     if let Some(locale) = locale_filter
@@ -207,6 +203,7 @@ fn inspect(
     let mut archives_without_listfile = 0usize;
 
     for archive_path in archive_paths {
+        let archive_index = u32::try_from(archives.len())?;
         let relative_path = archive_path
             .strip_prefix(&source_root)?
             .to_string_lossy()
@@ -275,15 +272,13 @@ fn inspect(
 
         for entry in entries {
             let is_anonymous = !record.has_listfile || is_synthetic_name(&entry.name);
-            let name_source = if is_anonymous {
+            if is_anonymous {
                 anonymous_entries += 1;
                 record.anonymous_entries += 1;
-                "anonymous-table-index"
             } else {
                 named_entries += 1;
                 record.named_entries += 1;
-                "internal-listfile"
-            };
+            }
 
             if is_anonymous && !include_anonymous {
                 anonymous_entries_skipped += 1;
@@ -305,9 +300,8 @@ fn inspect(
             add_entry(
                 &mut file_groups,
                 &display_path,
-                &relative_path,
+                archive_index,
                 &entry,
-                name_source,
             );
         }
 
@@ -327,8 +321,6 @@ fn inspect(
         .into_iter()
         .map(|(normalized_path, group)| FileRecord {
             path: group.path,
-            normalized_path,
-            extension: group.extension,
             providers: group.providers,
         })
         .collect::<Vec<_>>();
@@ -351,7 +343,7 @@ fn inspect(
     };
 
     let catalog = Catalog {
-        schema_version: 1,
+        schema_version: 2,
         generated_at_unix_seconds: SystemTime::now()
             .duration_since(UNIX_EPOCH)?
             .as_secs(),
@@ -367,6 +359,8 @@ fn inspect(
             "Only filenames exposed by an archive's usable internal (listfile) can be compared as real paths. Unnamed table entries are counted as anonymous.".to_owned(),
             "Archive layer categories are descriptive. No effective client load order or winning archive is inferred.".to_owned(),
             "Duplicate paths are grouped case-insensitively after normalizing slash direction.".to_owned(),
+            "Each file provider is [archiveIndex, uncompressedSizeBytes, compressedSizeBytes, flags]; archiveIndex refers to the same position in the archives array.".to_owned(),
+            "File paths preserve the first listed spelling; extension and name-source metadata are omitted because they can be derived from the path and the anonymous path prefix.".to_owned(),
         ],
     };
 
@@ -378,9 +372,14 @@ fn inspect(
 
     let output_file = fs::File::create(&output_path)?;
     let mut writer = BufWriter::new(output_file);
-    serde_json::to_writer_pretty(&mut writer, &catalog)?;
-    writer.write_all(b"\n")?;
+    if pretty {
+        serde_json::to_writer_pretty(&mut writer, &catalog)?;
+        writer.write_all(b"\n")?;
+    } else {
+        serde_json::to_writer(&mut writer, &catalog)?;
+    }
     writer.flush()?;
+    let output_size_bytes = fs::metadata(&output_path)?.len();
 
     println!("WoW MPQ Inspector");
     println!("=================");
@@ -397,6 +396,7 @@ fn inspect(
     println!("Unique paths:      {}", catalog.summary.unique_paths);
     println!("Duplicate paths:   {}", catalog.summary.duplicate_paths);
     println!("JSON:              {}", output_path.display());
+    println!("JSON size:         {:.2} MiB", output_size_bytes as f64 / 1_048_576.0);
 
     Ok(())
 }
@@ -558,35 +558,24 @@ fn normalize_path(path: &str) -> String {
 fn add_entry(
     groups: &mut BTreeMap<String, FileRecordBuilder>,
     path: &str,
-    archive_path: &str,
+    archive_index: u32,
     entry: &FileEntry,
-    name_source: &str,
 ) {
     let normalized_path = normalize_path(path);
-    let extension = if name_source == "internal-listfile" {
-        file_extension(path)
-    } else {
-        None
-    };
 
     let group = groups
         .entry(normalized_path)
         .or_insert_with(|| FileRecordBuilder {
             path: path.to_owned(),
-            extension,
             providers: Vec::new(),
         });
 
-    group.providers.push(FileProvider {
-        archive_path: archive_path.to_owned(),
-        uncompressed_size_bytes: entry.size,
-        compressed_size_bytes: entry.compressed_size,
-        flags: entry.flags,
-        is_compressed: entry.is_compressed(),
-        is_encrypted: entry.is_encrypted(),
-        is_mpq_patch_file: entry.is_patch_file(),
-        name_source: name_source.to_owned(),
-    });
+    group.providers.push(FileProvider(
+        archive_index,
+        entry.size,
+        entry.compressed_size,
+        entry.flags,
+    ));
 }
 
 fn append_error(target: &mut Option<String>, message: String) {
@@ -610,6 +599,15 @@ fn absolute_output_path(path: &Path) -> std::io::Result<PathBuf> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn serializes_provider_as_compact_tuple() {
+        let provider = FileProvider(3, 1024, 512, 256);
+        assert_eq!(
+            serde_json::to_string(&provider).unwrap(),
+            "[3,1024,512,256]"
+        );
+    }
 
     #[test]
     fn normalizes_case_and_slash_direction() {
