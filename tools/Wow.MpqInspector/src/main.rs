@@ -297,12 +297,7 @@ fn inspect(
                 entry.name.clone()
             };
 
-            add_entry(
-                &mut file_groups,
-                &display_path,
-                archive_index,
-                &entry,
-            );
+            add_entry(&mut file_groups, &display_path, archive_index, &entry);
         }
 
         archives.push(record);
@@ -396,7 +391,10 @@ fn inspect(
     println!("Unique paths:      {}", catalog.summary.unique_paths);
     println!("Duplicate paths:   {}", catalog.summary.duplicate_paths);
     println!("JSON:              {}", output_path.display());
-    println!("JSON size:         {:.2} MiB", output_size_bytes as f64 / 1_048_576.0);
+    println!(
+        "JSON size:         {:.2} MiB",
+        output_size_bytes as f64 / 1_048_576.0
+    );
 
     Ok(())
 }
